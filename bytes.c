@@ -48,7 +48,6 @@ byte_t* create_bytes(char* file_name)
 		}
 		fclose(file);
 	}
-	byte_arr_ptr = (byte_t*)realloc(byte_arr_ptr, count * sizeof(byte_t));
 	return byte_arr_ptr;
 }
 void print_bytes(byte_t* byte_array, FILE* out)
