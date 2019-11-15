@@ -5,26 +5,16 @@
 #include <stdio.h>
 #include "bytes.h"
 static int count = 0;
-void print(byte_t* arr, int count);
-void print(byte_t* arr, int count) {
-	byte_t* ptr = arr;
-	int i = 0;
-	while (i < count) {
-		printf("%u", *ptr);
-		ptr++;
-		i++;
-	}
-}
 byte_t* create_bytes(char* file_name)
 {
 	byte_t* byte_arr_ptr = NULL;
 	unsigned char j = 0; //represent the number of shift to the left
 	int arr_index = 0;
-	char line[20];
-	int temp_grade;
-	unsigned char grade = 0;
-	char* token = NULL;
-	char* wordcounter = NULL;
+	char line[20]; //char array to hold line chars, in the instructions you told to assume that the input is valid so it should be 20 chars max
+	int temp_grade;//parse grade from line
+	unsigned char grade = 0; // total grade of student for survey
+	char* token = NULL; //help with line parsing
+	char* wordcounter = NULL; //count the number of words in line in order to put the terminating char at the end
 	FILE* file = fopen(file_name, "r");
 	if (file == NULL) {//from stack overflow
 		perror("Can't open file");
@@ -53,7 +43,7 @@ byte_t* create_bytes(char* file_name)
 				j = j + 2; //shift 2 to the left
 				token = token + 2;
 			}
-			byte_arr_ptr[arr_index] = (unsigned char)grade;
+			byte_arr_ptr[arr_index] = grade;
 			arr_index++;
 		}
 		fclose(file);
@@ -70,7 +60,7 @@ void print_bytes(byte_t* byte_array, FILE* out)
 		fprintf(out, "%02x", byte_ans); //from stack overflow
 		i++;
 	}
-	fprintf(out, "\n");
+	fprintf(out, "\n"); // put line end char at the end of line
 }
 void set_stud(byte_t* byte_array, int i, int j, int k)
 {
@@ -78,15 +68,15 @@ void set_stud(byte_t* byte_array, int i, int j, int k)
 	unsigned char new_ans = (unsigned char)k;
 	int t = 0, s = j;
 	unsigned char current_stu_ans = byte_array[i-1];
-	first_bits = first_bits & current_stu_ans;
-	secondbits = secondbits & current_stu_ans;
-	thridbits = thridbits & current_stu_ans;
-	fourthbits = fourthbits & current_stu_ans;
-	while (s > 1) {
+	first_bits = first_bits & current_stu_ans; // save the student's answer for first question
+	secondbits = secondbits & current_stu_ans; // save the student's answer for second question
+	thridbits = thridbits & current_stu_ans; // save the student's answer for third question
+	fourthbits = fourthbits & current_stu_ans; // save the student's answer for fourth question
+	while (s > 1) { //need to know at which bits to store the upadted answer
 		t = t + 2;
 		s--;
 	}
-	k = k << t;
+	k = k << t; // shift the updated answer to correct bits
 	switch (j)
 	{
 	case 1 :
@@ -113,8 +103,8 @@ float average_stud(byte_t* byte_array, int i)
 	unsigned char current_num = byte_array[i-1];
 	unsigned char current_res = 0;
 	while (current_num > 0) {
-		current_res += (numattwobits & current_num);
-		current_num = current_num >> m;
+		current_res += (numattwobits & current_num); //capture first two bits and add to current_res
+		current_num = current_num >> m; // shift current_num to the right so now the first original bits are lost and replace by next pair of bits and so on until number is 0
 	}
 	avg = current_res;
 	return avg / 4.0; //divide ans sum by number of answers
@@ -127,13 +117,13 @@ float average_ans(byte_t* byte_array, int j)
 	unsigned int temp_ans = 0;
 	unsigned char ans_location = 3;
 	unsigned char current_stu_ans = 0;
-	while (j > 1) {
+	while (j > 1) { //need to know at which bits the answer lies in every line
 		k = k + 2;
 		j--;
 	}
 	ans_location = ans_location << k;
 	while (i < count) {
-		current_stu_ans = byte_array[i] & ans_location;
+		current_stu_ans = byte_array[i] & ans_location; //get the answer of student for the j's qeustion
 		current_stu_ans = current_stu_ans >> k;
 		avg += current_stu_ans;
 		i++;
