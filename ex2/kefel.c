@@ -2,40 +2,55 @@
 #include <stdlib.h>
 void deal_with_last_case_when_num_is_positive(FILE *file, int k) {
   int cnt = 0,cntn=0,cntm=0,power_of_two = 1,started_hovering_flag=0,first_assign_to_registerebx=0, first_assign_to_registerecx=0;
-  int first_time_to_assign_to_eax,first_command_flag = 0,stand_on_first_bit_flag=0, contiue_hovering_flag = 0;
-  fprintf(file, "movl $0, %%eax\n");
-  fprintf(file, "movl %%edi, %%ebx\n");
+  int first_time_to_assign_to_eax,first_command_flag = 0,stand_on_first_bit_flag=0, contiue_hovering_flag = 0,first_use_of_eax_flag =0;
+  fprintf(file, "kefel: movl %%edi, %%eax\n");
   while (power_of_two<k) {
-    if((k&0X01) > 0 && stand_on_first_bit_flag == 0) {
-      fprintf(file, "leal (%%eax,%%ebx), %%eax\n");
-      stand_on_first_bit_flag=1;
-    }else if ((k & power_of_two) > 0 && started_hovering_flag == 0) {
+    if ((k & power_of_two) > 0 && started_hovering_flag == 0) {
       started_hovering_flag = 1;
-      if(power_of_two!=1) {
         cntm=cnt-cntm;
         cntn = cnt-cntn;
-      }
     } else if ((k & power_of_two) > 0 && started_hovering_flag == 1) {
       contiue_hovering_flag = 1;
       cntn++;
     } else {
-      if (cntm == cntn && started_hovering_flag==1 && contiue_hovering_flag==0) {
+      if(first_use_of_eax_flag == 0 && started_hovering_flag==1) {
         started_hovering_flag=0;
-         if(cntm!=0) {
-          fprintf(file, "sall $%d, %%ebx\n", cntm);
-          fprintf(file, "leal (%%eax,%%ebx), %%eax\n");
-        }
-      } else if (cntm < cntn && started_hovering_flag==1 && contiue_hovering_flag==1){
         contiue_hovering_flag=0;
-        started_hovering_flag=0;
-        if(first_assign_to_registerecx == 0) {
-          first_assign_to_registerecx=1;
-          fprintf(file, "movl %%edi, %%ecx\n");
+        first_use_of_eax_flag =1;
+        if(cntm<cntn) {
+          if(first_assign_to_registerebx==0) {
+            first_assign_to_registerebx=1;
+            fprintf(file, "movl %%edi, %%ebx\n");
+          }
+          fprintf(file, "shl $%d, %%eax\n", cntn+1);
+          fprintf(file, "shl $%d, %%ebx\n", cntm);
+          fprintf(file, "sub %%ebx,%%eax\n");
+        } else {
+          if(cntm!=0) {
+            fprintf(file, "shl $%d, %%eax\n", cntm);
+          }
         }
-        fprintf(file, "sall $%d, %%ebx\n", cntm);
-        fprintf(file, "sall $%d, %%ecx\n", cntn+1);
-        fprintf(file, "subl %%ebx,%%ecx\n");
-        fprintf(file, "leal (%%eax,%%ecx), %%eax\n");
+      } else {
+        if (started_hovering_flag == 1 && contiue_hovering_flag == 0) {
+          started_hovering_flag = 0;
+            fprintf(file, "shl $%d, %%ebx\n", cntm);
+            fprintf(file, "leal (%%eax,%%ebx), %%eax\n");
+        } else if (started_hovering_flag == 1 && contiue_hovering_flag == 1) {
+          if(first_assign_to_registerebx==0) {
+            first_assign_to_registerebx=1;
+            fprintf(file, "movl %%edi, %%ebx\n");
+          }
+          contiue_hovering_flag = 0;
+          started_hovering_flag = 0;
+          if (first_assign_to_registerecx == 0) {
+            first_assign_to_registerecx = 1;
+            fprintf(file, "movl %%edi, %%ecx\n");
+          }
+          fprintf(file, "shl $%d, %%ebx\n", cntm);
+          fprintf(file, "shl $%d, %%ecx\n", cntn + 1);
+          fprintf(file, "sub %%ebx,%%ecx\n");
+          fprintf(file, "leal (%%eax,%%ecx), %%eax\n");
+        }
       }
     }
     power_of_two*=2;
@@ -43,17 +58,27 @@ void deal_with_last_case_when_num_is_positive(FILE *file, int k) {
   }
   if (started_hovering_flag == 1) {
     if(contiue_hovering_flag == 0) {
-      fprintf(file, "sall $%d, %%ebx\n", cntm);
+      fprintf(file, "shl $%d, %%ebx\n", cntm);
       fprintf(file, "leal (%%eax,%%ebx), %%eax\n");
     } else {
-      if (first_assign_to_registerecx == 0) {
-        first_assign_to_registerecx = 1;
-        fprintf(file, "movl %%edi, %%ecx\n");
+      if (first_assign_to_registerebx == 0) {
+        first_assign_to_registerebx=1;
+        fprintf(file, "movl %%edi, %%ebx\n");
+        fprintf(file, "shl $%d, %%eax\n", cntn+1);
+        fprintf(file, "shl $%d, %%ebx\n", cntm);
+        fprintf(file, "sub %%ebx, %%eax\n");
+      } else {
+        if (first_assign_to_registerecx == 0) {
+          first_assign_to_registerecx = 1;
+          fprintf(file, "movl %%edi, %%ecx\n");
+          fprintf(file, "shl $%d, %%ecx\n", cnt);
+        } else {
+          fprintf(file, "shl $%d, %%ecx\n", cntn + 1);
+        }
+        fprintf(file, "shl $%d, %%ebx\n", cntm);
+        fprintf(file, "sub %%ebx,%%ecx\n");
+        fprintf(file, "leal (%%eax,%%ecx), %%eax\n");
       }
-      fprintf(file, "sall $%d, %%ebx\n", cntm);
-      fprintf(file, "sall $%d, %%ecx\n", cntn + 1);
-      fprintf(file, "sub %%ebx,%%ecx\n");
-      fprintf(file, "leal (%%eax,%%ecx), %%eax\n");
     }
   }
 }
@@ -173,23 +198,22 @@ int main(int argc, char *argv[]) {
     neg_flag = 1;
   }
   if(check_if_condition_three_possible(k)==1){
-      if (k % 2 == 0 && k % 9 == 0) {
-        deal_with_nine(file,k);
-        k = k/9;
-        k = fill_number_with_power_of_two(file, k);
-      } else if (k % 2 == 0 &&  k % 5 == 0) {
-        deal_with_five(file,k);
-        k = k/5;
-        k = fill_number_with_power_of_two(file, k);
-      } else if (k % 2 == 0 &&  k%3 ==0){
-        deal_with_three(file,k);
-        k = k/3;
-        k = fill_number_with_power_of_two(file, k);
-      }
-    } else if(check_if_num_is_power_of_two(k) == 1) {
+    if (k % 2 == 0 && k % 9 == 0) {
+      deal_with_nine(file,k);
+      k = k/9;
+      k = fill_number_with_power_of_two(file, k);
+    } else if (k % 2 == 0 &&  k % 5 == 0) {
+      deal_with_five(file,k);
+      k = k/5;
+      k = fill_number_with_power_of_two(file, k);
+    } else if (k % 2 == 0 &&  k%3 ==0){
+      deal_with_three(file,k);
+      k = k/3;
+      k = fill_number_with_power_of_two(file, k);
+    }
+  } else if(check_if_num_is_power_of_two(k) == 1) {
     deal_when_num_is_power_of_two(file,k);
   } else{
-    fprintf(file, "kefel:\n");
     deal_with_last_case_when_num_is_positive(file,k);
   }
   if (neg_flag == 1) {
