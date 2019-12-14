@@ -2,40 +2,32 @@
 #include <stdlib.h>
 void deal_with_last_case_when_num_is_positive(FILE *file, int k) {
   int cnt = 0,cntn=0,cntm=0,power_of_two = 1,started_hovering_flag=0,first_assign_to_registerebx=0, first_assign_to_registerecx=0;
-  int first_time_to_assign_to_eax,first_command_flag = 0,stand_on_first_bit_flag=0;
+  int first_time_to_assign_to_eax,first_command_flag = 0,stand_on_first_bit_flag=0, contiue_hovering_flag = 0;
   fprintf(file, "movl $0, %%eax\n");
   fprintf(file, "movl %%edi, %%ebx\n");
   while (power_of_two<k) {
-    if ((k & power_of_two) > 0 && started_hovering_flag == 0) {
+    if((k&0X01) > 0 && stand_on_first_bit_flag == 0) {
+      fprintf(file, "leal (%%eax,%%ebx), %%eax\n");
+      stand_on_first_bit_flag=1;
+    }else if ((k & power_of_two) > 0 && started_hovering_flag == 0) {
       started_hovering_flag = 1;
-      if (power_of_two != 1) {
-        cntm = cnt;
-        cntn = cntm;
+      if(power_of_two!=1) {
+        cntm=cnt-cntm;
+        cntn = cnt-cntn;
       }
     } else if ((k & power_of_two) > 0 && started_hovering_flag == 1) {
+      contiue_hovering_flag = 1;
       cntn++;
     } else {
-      started_hovering_flag = 0;
-      if (cntm == cntn) {
-        if((k&0X01) > 0 && stand_on_first_bit_flag == 0) {
-          if (first_time_to_assign_to_eax) {
-            first_time_to_assign_to_eax=1;
-            fprintf(file, "movl %%ebx, %%eax\n");
-          } else {
-            fprintf(file, "leal (%%eax,%%ebx), %%eax\n");
-          }
-          stand_on_first_bit_flag=1;
-        } else if(cntm!=0) {
+      if (cntm == cntn && started_hovering_flag==1 && contiue_hovering_flag==0) {
+        started_hovering_flag=0;
+         if(cntm!=0) {
           fprintf(file, "sall $%d, %%ebx\n", cntm);
-          if (first_time_to_assign_to_eax) {
-            first_time_to_assign_to_eax=1;
-            fprintf(file, "movl %%ebx, %%eax\n");
-          } else {
-            fprintf(file, "leal (%%eax,%%ebx), %%eax\n");
-          }
+          fprintf(file, "leal (%%eax,%%ebx), %%eax\n");
         }
-        started_hovering_flag = 0;
-      } else {
+      } else if (cntm < cntn && started_hovering_flag==1 && contiue_hovering_flag==1){
+        contiue_hovering_flag=0;
+        started_hovering_flag=0;
         if(first_assign_to_registerecx == 0) {
           first_assign_to_registerecx=1;
           fprintf(file, "movl %%edi, %%ecx\n");
@@ -45,23 +37,21 @@ void deal_with_last_case_when_num_is_positive(FILE *file, int k) {
         fprintf(file, "subl %%ebx,%%ecx\n");
         fprintf(file, "leal (%%eax,%%ecx), %%eax\n");
       }
-      cntn=0;
-      cntm=0;
     }
     power_of_two*=2;
     cnt++;
   }
   if (started_hovering_flag == 1) {
-    if (cntm == cntn) {
-        fprintf(file, "sall $%d, %%ebx\n", cntm);
-        fprintf(file, "leal (%%eax,%%ebx), %%eax\n");
+    if(contiue_hovering_flag == 0) {
+      fprintf(file, "sall $%d, %%ebx\n", cntm);
+      fprintf(file, "leal (%%eax,%%ebx), %%eax\n");
     } else {
-      if(first_assign_to_registerecx == 0) {
-        first_assign_to_registerecx=1;
+      if (first_assign_to_registerecx == 0) {
+        first_assign_to_registerecx = 1;
         fprintf(file, "movl %%edi, %%ecx\n");
       }
       fprintf(file, "sall $%d, %%ebx\n", cntm);
-      fprintf(file, "sall $%d, %%ecx\n", cntn+1);
+      fprintf(file, "sall $%d, %%ecx\n", cntn + 1);
       fprintf(file, "sub %%ebx,%%ecx\n");
       fprintf(file, "leal (%%eax,%%ecx), %%eax\n");
     }
@@ -196,14 +186,11 @@ int main(int argc, char *argv[]) {
         k = k/3;
         k = fill_number_with_power_of_two(file, k);
       }
-    }else if(check_if_num_is_power_of_two(k) == 1) {
+    } else if(check_if_num_is_power_of_two(k) == 1) {
     deal_when_num_is_power_of_two(file,k);
   } else{
     fprintf(file, "kefel:\n");
-    if(neg_flag == 1) {
-    } else {
-      deal_with_last_case_when_num_is_positive(file,k);
-    }
+    deal_with_last_case_when_num_is_positive(file,k);
   }
   if (neg_flag == 1) {
     fprintf(file, "neg %%eax\n");
