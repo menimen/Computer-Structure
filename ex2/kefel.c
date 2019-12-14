@@ -177,7 +177,12 @@ int main(int argc, char *argv[]) {
     deal_with_five(file,k);
   }else if (k==3) {
     deal_with_three(file,k);
-  }else if(check_if_condition_three_possible(k)==1){
+  }
+  if (k < 0) {
+    k = k * -1;
+    neg_flag = 1;
+  }
+  if(check_if_condition_three_possible(k)==1){
       if (k % 2 == 0 && k % 9 == 0) {
         deal_with_nine(file,k);
         k = k/9;
