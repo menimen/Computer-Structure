@@ -7,8 +7,8 @@ void deal_with_last_case_when_num_is_positive(FILE *file, int k) {
   while (power_of_two<k) {
     if ((k & power_of_two) > 0 && started_hovering_flag == 0) {
       started_hovering_flag = 1;
-        cntm=cnt-cntm;
-        cntn = cnt-cntn;
+      cntm=cnt-cntm;
+      cntn = cnt-cntn;
     } else if ((k & power_of_two) > 0 && started_hovering_flag == 1) {
       contiue_hovering_flag = 1;
       cntn++;
@@ -23,7 +23,9 @@ void deal_with_last_case_when_num_is_positive(FILE *file, int k) {
             fprintf(file, "movl %%edi, %%ebx\n");
           }
           fprintf(file, "shl $%d, %%eax\n", cntn+1);
-          fprintf(file, "shl $%d, %%ebx\n", cntm);
+          if(cntm!=0) {
+            fprintf(file, "shl $%d, %%ebx\n", cntm);
+          }
           fprintf(file, "sub %%ebx,%%eax\n");
         } else {
           if(cntm!=0) {
@@ -33,8 +35,8 @@ void deal_with_last_case_when_num_is_positive(FILE *file, int k) {
       } else {
         if (started_hovering_flag == 1 && contiue_hovering_flag == 0) {
           started_hovering_flag = 0;
-            fprintf(file, "shl $%d, %%ebx\n", cntm);
-            fprintf(file, "leal (%%eax,%%ebx), %%eax\n");
+          fprintf(file, "shl $%d, %%ebx\n", cntm);
+          fprintf(file, "leal (%%eax,%%ebx), %%eax\n");
         } else if (started_hovering_flag == 1 && contiue_hovering_flag == 1) {
           if(first_assign_to_registerebx==0) {
             first_assign_to_registerebx=1;
@@ -44,10 +46,10 @@ void deal_with_last_case_when_num_is_positive(FILE *file, int k) {
           started_hovering_flag = 0;
           if (first_assign_to_registerecx == 0) {
             first_assign_to_registerecx = 1;
-            fprintf(file, "movl %%edi, %%ecx\n");
           }
+          fprintf(file, "movl %%edi, %%ecx\n");
           fprintf(file, "shl $%d, %%ebx\n", cntm);
-          fprintf(file, "shl $%d, %%ecx\n", cntn + 1);
+          fprintf(file, "shl $%d, %%ecx\n", cnt);
           fprintf(file, "sub %%ebx,%%ecx\n");
           fprintf(file, "leal (%%eax,%%ecx), %%eax\n");
         }
@@ -58,7 +60,13 @@ void deal_with_last_case_when_num_is_positive(FILE *file, int k) {
   }
   if (started_hovering_flag == 1) {
     if(contiue_hovering_flag == 0) {
-      fprintf(file, "shl $%d, %%ebx\n", cntm);
+      if (first_assign_to_registerebx == 0) {
+        first_assign_to_registerebx = 1;
+        fprintf(file, "movl %%edi, %%ebx\n");
+        fprintf(file, "shl $%d, %%ebx\n", cnt-1);
+      } else {
+        fprintf(file, "shl $%d, %%ebx\n", cntm);
+      }
       fprintf(file, "leal (%%eax,%%ebx), %%eax\n");
     } else {
       if (first_assign_to_registerebx == 0) {
@@ -73,7 +81,8 @@ void deal_with_last_case_when_num_is_positive(FILE *file, int k) {
           fprintf(file, "movl %%edi, %%ecx\n");
           fprintf(file, "shl $%d, %%ecx\n", cnt);
         } else {
-          fprintf(file, "shl $%d, %%ecx\n", cntn + 1);
+          fprintf(file, "movl %%edi, %%ecx\n");
+          fprintf(file, "shl $%d, %%ecx\n", cnt);
         }
         fprintf(file, "shl $%d, %%ebx\n", cntm);
         fprintf(file, "sub %%ebx,%%ecx\n");
