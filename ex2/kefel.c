@@ -30,7 +30,7 @@ void deal_with_last_case_when_num_is_positive(FILE *file, int k) {
           } else {
             fprintf(file, "shl $%d, %%ebx\n", cntm);
           }
-          fprintf(file, "add %%ebx,%%eax\n");
+          fprintf(file, "leal (%%ebx,%%eax), %%eax\n");
         }
       } else if (started_hovering_flag == 1 && contiue_hovering_flag == 1) {
         started_hovering_flag=0;
@@ -82,7 +82,7 @@ void deal_with_last_case_when_num_is_positive(FILE *file, int k) {
         }
         wheretostartshiftforb=wheretostartshift-wheretostartshiftforb;
         fprintf(file, "shl $%d, %%ebx\n", cntm);
-        fprintf(file, "add %%ebx, %%eax\n");
+        fprintf(file, "leal (%%ebx,%%eax), %%eax\n");
       }
     }else {
     if(first_time_to_assign_to_eax==0) {
