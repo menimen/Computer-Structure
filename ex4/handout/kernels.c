@@ -6,9 +6,6 @@
 #include <stdlib.h>
 #include "defs.h"
 
-
-
-
 /* 
  * Please fill in the following team struct 
  */
@@ -24,7 +21,7 @@ team_t team = {
 
 /***************
  * ROTATE KERNEL
- ***************/
+ ****************/
 
 /******************************************************
  * Your different versions of the rotate kernel go here
@@ -141,7 +138,9 @@ static pixel avg(int dim, int i, int j, pixel *src)
     pixel_sum sum;
     pixel current_pixel;
 
-    initialize_pixel_sum(&sum);
+    //initialize_pixel_sum(&sum);
+    sum.red = sum.green = sum.blue = 0;
+    sum.num = 0;
     for(ii = max(i-1, 0); ii <= min(i+1, dim-1); ii++) 
 	for(jj = max(j-1, 0); jj <= min(j+1, dim-1); jj++) 
 	    accumulate_sum(&sum, src[RIDX(ii, jj, dim)]);
@@ -172,9 +171,17 @@ void naive_smooth(int dim, pixel *src, pixel *dst)
  * IMPORTANT: This is the version you will be graded on
  */
 char smooth_descr[] = "smooth: Current working version";
+void eitan_smooth(int dim, pixel *src, pixel *dst) 
+{
+    int i, j;
+
+    for (i = 0; i < dim; i++)
+	for (j = 0; j < dim; j++)
+	    dst[RIDX(i, j, dim)] = avg(dim, i, j, src);
+}
 void smooth(int dim, pixel *src, pixel *dst) 
 {
-    naive_smooth(dim, src, dst);
+    eitan_smooth(dim, src, dst);
 }
 
 
