@@ -6,14 +6,17 @@
 #include <stdlib.h>
 #include "defs.h"
 
+
+
+
 /* 
  * Please fill in the following team struct 
  */
 team_t team = {
-    "bovik",              /* Team name */
+    "FC Barcelona",              /* Team name */
 
-    "Harry Q. Bovik",     /* First member full name */
-    "bovik@nowhere.edu",  /* First member email address */
+    "Meni Ashurov",     /* First member full name */
+    "menash9288@gmail.com",  /* First member email address */
 
     "",                   /* Second member full name (leave blank if none) */
     ""                    /* Second member email addr (leave blank if none) */
@@ -45,9 +48,17 @@ void naive_rotate(int dim, pixel *src, pixel *dst)
  * IMPORTANT: This is the version you will be graded on
  */
 char rotate_descr[] = "rotate: Current working version";
+void meni_naive_rotate(int dim, pixel *src, pixel *dst) 
+{
+    int i, j;
+
+    for (j = 0; j < dim; j++)
+	for (i = 0; i < dim; i++)
+	    dst[RIDX(dim-1-j, i, dim)] = src[RIDX(i, j, dim)];
+}
 void rotate(int dim, pixel *src, pixel *dst) 
 {
-    naive_rotate(dim, src, dst);
+    meni_naive_rotate(dim, src, dst);
 }
 
 /*********************************************************************
