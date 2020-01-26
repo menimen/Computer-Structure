@@ -173,11 +173,140 @@ void naive_smooth(int dim, pixel *src, pixel *dst)
 char smooth_descr[] = "smooth: Current working version";
 void eitan_smooth(int dim, pixel *src, pixel *dst) 
 {
-    int i, j;
+   int i, j;
+    int accum_red, accum_green, accum_blue;
 
-    for (i = 0; i < dim; i++)
-	for (j = 0; j < dim; j++)
-	    dst[RIDX(i, j, dim)] = avg(dim, i, j, src);
+    // upper left corner
+    accum_red = (int) src[RIDX(0, 0, dim)].red + (int) src[RIDX(0, 1, dim)].red
+                + (int) src[RIDX(1, 0, dim)].red + (int) src[RIDX(1, 1, dim)].red;
+    accum_green = (int) src[RIDX(0, 0, dim)].green + (int) src[RIDX(0, 1, dim)].green
+                  + (int) src[RIDX(1, 0, dim)].green + (int) src[RIDX(1, 1, dim)].green;
+    accum_blue = (int) src[RIDX(0, 0, dim)].blue + (int) src[RIDX(0, 1, dim)].blue
+                 + (int) src[RIDX(1, 0, dim)].blue + (int) src[RIDX(1, 1, dim)].blue;
+    dst[RIDX(0, 0, dim)].red = (unsigned short)(accum_red / 4);
+    dst[RIDX(0, 0, dim)].green = (unsigned short)(accum_green / 4);
+    dst[RIDX(0, 0, dim)].blue = (unsigned short)(accum_blue / 4);
+
+    // initial down left corner
+    accum_red = (int) src[RIDX(dim - 1, dim - 1, dim)].red + (int) src[RIDX(dim - 1, dim - 2, dim)].red
+                + (int) src[RIDX(dim - 2, dim - 1, dim)].red + (int) src[RIDX(dim-2, dim-2, dim)].red;
+    accum_green = (int) src[RIDX(dim - 1, dim - 1, dim)].green + (int) src[RIDX(dim - 1, dim - 2, dim)].green
+                  + (int) src[RIDX(dim - 2, dim - 1, dim)].green + (int) src[RIDX(dim-2, dim-2, dim)].green;
+    accum_blue = (int) src[RIDX(dim - 1, dim - 1, dim)].blue + (int) src[RIDX(dim - 1, dim - 2, dim)].blue
+                 + (int) src[RIDX(dim - 2, dim - 1, dim)].blue + (int) src[RIDX(dim-2, dim-2, dim)].blue;
+    dst[RIDX(dim - 1, dim - 1, dim)].red = (unsigned short)(accum_red / 4);
+    dst[RIDX(dim - 1, dim - 1, dim)].green = (unsigned short)(accum_green / 4);
+    dst[RIDX(dim - 1, dim - 1, dim)].blue = (unsigned short)(accum_blue / 4);
+
+    // initial upper right corner
+    accum_red = (int) src[RIDX(0, dim - 1, dim)].red + (int) src[RIDX(0, dim - 2, dim)].red
+                + (int) src[RIDX(1, dim - 1, dim)].red + (int) src[RIDX(1, dim-2, dim)].red;
+    accum_green = (int) src[RIDX(0, dim - 1, dim)].green + (int) src[RIDX(0, dim - 2, dim)].green
+                  + (int) src[RIDX(1, dim - 1, dim)].green + (int) src[RIDX(1, dim-2, dim)].green;
+    accum_blue = (int) src[RIDX(0, dim - 1, dim)].blue + (int) src[RIDX(0, dim - 2, dim)].blue
+                 + (int) src[RIDX(1, dim - 1, dim)].blue + (int) src[RIDX(1, dim-2, dim)].blue;
+    dst[RIDX(0, dim - 1, dim)].red = (unsigned short)(accum_red / 4);
+    dst[RIDX(0, dim - 1, dim)].green = (unsigned short)(accum_green / 4);
+    dst[RIDX(0, dim - 1, dim)].blue = (unsigned short)(accum_blue / 4);
+
+    // initial down left corner
+    accum_red = (int) src[RIDX(dim - 1, 0, dim)].red + (int) src[RIDX(dim - 1, 1, dim)].red
+                + (int) src[RIDX(dim - 2, 0, dim)].red + (int) src[RIDX(dim - 2, 1, dim)].red;
+    accum_green = (int) src[RIDX(dim - 1, 0, dim)].green + (int) src[RIDX(dim - 1, 1, dim)].green
+                  + (int) src[RIDX(dim - 2, 0, dim)].green + (int) src[RIDX(dim - 2, 1, dim)].green;
+    accum_blue = (int) src[RIDX(dim - 1, 0, dim)].blue + (int) src[RIDX(dim - 1, 1, dim)].blue
+                 + (int) src[RIDX(dim - 2, 0, dim)].blue + (int) src[RIDX(dim - 2, 1, dim)].blue;
+    dst[RIDX(dim - 1, 0, dim)].red = (unsigned short)(accum_red / 4);
+    dst[RIDX(dim - 1, 0, dim)].green = (unsigned short)(accum_green / 4);
+    dst[RIDX(dim - 1, 0, dim)].blue = (unsigned short)(accum_blue / 4);
+
+    //initial upper row
+    for(j = 1; j < dim-1; j++) {
+        accum_red = (int) src[RIDX(0, j-1, dim)].red + (int) src[RIDX(0, j, dim)].red
+                    + (int) src[RIDX(0, j + 1, dim)].red + (int) src[RIDX(1, j-1, dim)].red
+                    + (int) src[RIDX(1, j, dim)].red + (int) src[RIDX(1, j+1, dim)].red;
+        accum_green = (int) src[RIDX(0, j-1, dim)].green + (int) src[RIDX(0, j, dim)].green
+                      + (int) src[RIDX(0, j + 1, dim)].green + (int) src[RIDX(1, j-1, dim)].green
+                      + (int) src[RIDX(1, j, dim)].green + (int) src[RIDX(1, j+1, dim)].green;
+        accum_blue = (int) src[RIDX(0, j-1, dim)].blue + (int) src[RIDX(0, j, dim)].blue
+                     + (int) src[RIDX(0, j + 1, dim)].blue + (int) src[RIDX(1, j-1, dim)].blue
+                     + (int) src[RIDX(1, j, dim)].blue + (int) src[RIDX(1, j+1, dim)].blue;
+        dst[RIDX(0, j, dim)].red = (unsigned short)(accum_red / 6);
+        dst[RIDX(0, j, dim)].green = (unsigned short)(accum_green / 6);
+        dst[RIDX(0, j, dim)].blue = (unsigned short)(accum_blue / 6);
+    }
+
+    // initial lower row
+    for(j = 1; j < dim-1; j++) {
+        accum_red = (int) src[RIDX(dim-1, j-1, dim)].red + (int) src[RIDX(dim-1, j, dim)].red
+                    + (int) src[RIDX(dim-1, j + 1, dim)].red + (int) src[RIDX(dim-2, j-1, dim)].red
+                    + (int) src[RIDX(dim-2, j, dim)].red + (int) src[RIDX(dim-2, j+1, dim)].red;
+        accum_green = (int) src[RIDX(dim-1, j-1, dim)].green + (int) src[RIDX(dim-1, j, dim)].green
+                      + (int) src[RIDX(dim-1, j + 1, dim)].green + (int) src[RIDX(dim-2, j-1, dim)].green
+                      + (int) src[RIDX(dim-2, j, dim)].green + (int) src[RIDX(dim-2, j+1, dim)].green;
+        accum_blue = (int) src[RIDX(dim-1, j-1, dim)].blue + (int) src[RIDX(dim-1, j, dim)].blue
+                     + (int) src[RIDX(dim-1, j + 1, dim)].blue + (int) src[RIDX(dim-2, j-1, dim)].blue
+                     + (int) src[RIDX(dim-2, j, dim)].blue + (int) src[RIDX(dim-2, j+1, dim)].blue;
+        dst[RIDX(dim-1, j, dim)].red = (unsigned short)(accum_red / 6);
+        dst[RIDX(dim-1, j, dim)].green = (unsigned short)(accum_green / 6);
+        dst[RIDX(dim-1, j, dim)].blue = (unsigned short)(accum_blue / 6);
+    }
+
+    //initial left col
+    for (i = 1; i < dim-1; i++) {
+        accum_red = (int) src[RIDX(i-1, 0, dim)].red + (int) src[RIDX(i, 0, dim)].red
+                    + (int) src[RIDX(i+1, 0, dim)].red + (int) src[RIDX(i-1, 1, dim)].red
+                    + (int) src[RIDX(i, 1, dim)].red + (int) src[RIDX(i+1, 1, dim)].red;
+        accum_green = (int) src[RIDX(i-1, 0, dim)].green + (int) src[RIDX(i, 0, dim)].green
+                      + (int) src[RIDX(i+1, 0, dim)].green + (int) src[RIDX(i-1, 1, dim)].green
+                      + (int) src[RIDX(i, 1, dim)].green + (int) src[RIDX(i+1, 1, dim)].green;
+        accum_blue = (int) src[RIDX(i-1, 0, dim)].blue + (int) src[RIDX(i, 0, dim)].blue
+                     + (int) src[RIDX(i+1, 0, dim)].blue + (int) src[RIDX(i-1, 1, dim)].blue
+                     + (int) src[RIDX(i, 1, dim)].blue + (int) src[RIDX(i+1, 1, dim)].blue;
+        dst[RIDX(i, 0, dim)].red = (unsigned short)(accum_red / 6);
+        dst[RIDX(i, 0, dim)].green = (unsigned short)(accum_green / 6);
+        dst[RIDX(i, 0, dim)].blue = (unsigned short)(accum_blue / 6);
+    }
+
+    // initial right col
+    for (i = 1; i < dim-1; i++) {
+        accum_red = (int) src[RIDX(i-1, dim-1, dim)].red + (int) src[RIDX(i, dim-1, dim)].red
+                    + (int) src[RIDX(i+1, dim-1, dim)].red + (int) src[RIDX(i-1, dim-2, dim)].red
+                    + (int) src[RIDX(i, dim-2, dim)].red + (int) src[RIDX(i+1, dim-2, dim)].red;
+        accum_green = (int) src[RIDX(i-1, dim-1, dim)].green + (int) src[RIDX(i, dim-1, dim)].green
+                      + (int) src[RIDX(i+1, dim-1, dim)].green + (int) src[RIDX(i-1, dim-2, dim)].green
+                      + (int) src[RIDX(i, dim-2, dim)].green + (int) src[RIDX(i+1, dim-2, dim)].green;
+        accum_blue = (int) src[RIDX(i-1, dim-1, dim)].blue + (int) src[RIDX(i, dim-1, dim)].blue
+                     + (int) src[RIDX(i+1, dim-1, dim)].blue + (int) src[RIDX(i-1, dim-2, dim)].blue
+                     + (int) src[RIDX(i, dim-2, dim)].blue + (int) src[RIDX(i+1, dim-2, dim)].blue;
+        dst[RIDX(i, dim-1, dim)].red = (unsigned short)(accum_red / 6);
+        dst[RIDX(i, dim-1, dim)].green = (unsigned short)(accum_green / 6);
+        dst[RIDX(i, dim-1, dim)].blue = (unsigned short)(accum_blue / 6);
+    }
+
+    // initial all the rest
+    for(i = 1; i < dim-1; i++) {
+        for (j = 1; j < dim-1; j++) {
+            accum_red = (int) src[RIDX(i-1, j-1, dim)].red + (int) src[RIDX(i-1, j, dim)].red
+                        + (int) src[RIDX(i-1, j + 1, dim)].red + (int) src[RIDX(i, j-1, dim)].red
+                        + (int) src[RIDX(i, j, dim)].red + (int) src[RIDX(i, j + 1, dim)].red
+                        + (int) src[RIDX(i+1, j-1, dim)].red + (int) src[RIDX(i+1, j, dim)].red
+                        + (int) src[RIDX(i+1, j + 1, dim)].red;
+            accum_green = (int) src[RIDX(i-1, j-1, dim)].green + (int) src[RIDX(i-1, j, dim)].green
+                          + (int) src[RIDX(i-1, j + 1, dim)].green + (int) src[RIDX(i, j-1, dim)].green
+                          + (int) src[RIDX(i, j, dim)].green + (int) src[RIDX(i, j + 1, dim)].green
+                          + (int) src[RIDX(i+1, j-1, dim)].green + (int) src[RIDX(i+1, j, dim)].green
+                          + (int) src[RIDX(i+1, j + 1, dim)].green;
+            accum_blue = (int) src[RIDX(i-1, j-1, dim)].blue + (int) src[RIDX(i-1, j, dim)].blue
+                         + (int) src[RIDX(i-1, j + 1, dim)].blue + (int) src[RIDX(i, j-1, dim)].blue
+                         + (int) src[RIDX(i, j, dim)].blue + (int) src[RIDX(i, j + 1, dim)].blue
+                         + (int) src[RIDX(i+1, j-1, dim)].blue + (int) src[RIDX(i+1, j, dim)].blue
+                         + (int) src[RIDX(i+1, j + 1, dim)].blue;
+            dst[RIDX(i, j, dim)].red = (unsigned short)(accum_red / 9);
+            dst[RIDX(i, j, dim)].green = (unsigned short)(accum_green / 9);
+            dst[RIDX(i, j, dim)].blue = (unsigned short)(accum_blue / 9);
+        }
+    }
 }
 void smooth(int dim, pixel *src, pixel *dst) 
 {
